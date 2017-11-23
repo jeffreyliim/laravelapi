@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\UserRolesResource;
 use App\Http\Resources\UserRolesResourceCollection;
 use App\Role;
 use App\User;
@@ -38,16 +39,20 @@ class UserRolesController extends Controller
      */
     public function store(Request $request, User $user)
     {
+        //validate that role ID is required and is an integer
+        $this->validate($request, [
+            'role_id' => 'required|integer'
+        ]);
         /**
          * For many to many relationship, syncWithoutDetaching detaching allows multiple roles
          * without having multiple rows of
          * the same role attached to the same user in the DB
          */
 
-        $role = Role::find($request->get('roleID'));
+        $role = Role::find($request->get('role_id'));
         $user->roles()->syncWithoutDetaching($role->id);
 
-        return response()->json('success', 201);
+        return response()->json(new UserRolesResource($user->load('roles')), 201);
     }
 
     /**
@@ -81,12 +86,17 @@ class UserRolesController extends Controller
      */
     public function update(Request $request, User $user, Role $role)
     {
+        //validate that role ID is required and is an integer
+        $this->validate($request, [
+            'role_id' => 'required|integer'
+        ]);
+
         /*
          * To update a many to many relationships field, use updateExistingPivot instead of update method.
          * */
 
-        $user->roles()->updateExistingPivot($role->id, ['role_id' => Role::find($request->get('roleID'))->id]);
-        return response()->json('success', 201);
+        $user->roles()->updateExistingPivot($role->id, ['role_id' => Role::find($request->get('role_id'))->id]);
+        return response()->json(new UserRolesResource($user->load('roles')), 200);
     }
 
     /**
@@ -99,6 +109,6 @@ class UserRolesController extends Controller
     {
         $user->roles()->detach($role->id);
 
-        return response()->json('success', 204);
+        return response()->json(null, 204);
     }
 }

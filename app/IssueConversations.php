@@ -24,9 +24,21 @@ use Illuminate\Database\Eloquent\Model;
  */
 class IssueConversations extends Model
 {
+    protected $table = 'issue_conversations';
+
     protected $fillable = [
-        'user_id','issue_id','conversation'
+        'user_id', 'issue_id', 'conversation'
     ];
+
+    protected $hidden = [
+        'created_at', 'updated_at'
+    ];
+
+//    protected $with = [
+//        'issue'
+//    ];
+
+    public $timestamps = true;
 
     public function issue()
     {

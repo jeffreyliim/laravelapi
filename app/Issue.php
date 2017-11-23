@@ -23,9 +23,21 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Issue extends Model
 {
+    protected $table = 'issues';
+
     public $fillable = [
-        'issue', 'created_at', 'updated_at'
+        'user_id', 'issue'
     ];
+
+    protected $hidden = [
+        'created_at', 'updated_at'
+    ];
+
+//    protected $with = [
+//        'user', 'conversations'
+//    ];
+
+    public $timestamps = true;
 
     public function user()
     {
@@ -36,4 +48,5 @@ class Issue extends Model
     {
         return $this->hasMany(IssueConversations::class);
     }
+
 }

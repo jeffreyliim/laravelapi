@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\IssueConversationCheck;
+use App\Exceptions\UserConversationCheck;
+use App\Http\Requests\IssuesConversationsRequest;
+use App\Http\Resources\IssueConversationResource;
 use App\Http\Resources\IssueConversationResourceCollection;
+use App\Http\Resources\IssueResource;
+use App\Http\Resources\IssuesResourceCollection;
 use App\Issue;
 use App\IssueConversations;
 use Illuminate\Http\Request;
@@ -17,6 +23,8 @@ class IssueConversationsController extends Controller
      */
     public function index()
     {
+        //gets index collection of conversations including meta data
+
         return new IssueConversationResourceCollection(IssueConversations::paginate());
     }
 
@@ -27,18 +35,19 @@ class IssueConversationsController extends Controller
      * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, Issue $issue)
+    public function store(IssuesConversationsRequest $request, Issue $issue)
     {
         /*
          * either use  Issue::find($id) // $issue
          * */
 
-        $conversation = $issue->conversations()->create([
+        $issue->conversations()->create([
             'user_id' => $request->user()->id,
-            'conversation' => $request->get('message')
+            'conversation' => $request->get('conversation')
         ]);
 
-        return response()->json($conversation, 200);
+        //post response 201, want both issue and conversation when store
+        return response()->json(new IssueConversationResource($issue->load('conversations')), 201);
     }
 
 
@@ -49,13 +58,20 @@ class IssueConversationsController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $issueID, $issueConversationID)
+    public function update(IssuesConversationsRequest $request, Issue $issue, $issuesConversationID)
     {
-        $conversation = Issue::find($issueID)->conversations()->find($issueConversationID)->update([
-            'conversation'=>$request->get('message')
-        ]);
+        //checking if user id belongs to the conversation
+        if ($request->user()->id != IssueConversations::find($issuesConversationID)->user_id) {
+            throw new UserConversationCheck;
+        } //check if issue id matches the issue id in the conversation
+        else if ($issue->id != IssueConversations::find($issuesConversationID)->issue_id) {
+            throw new IssueConversationCheck;
+        }
+        //update
+        $issue->conversations()->find($issuesConversationID)->update($request->all());
 
-        return response()->json($conversation, 200);
+        //update response 200, only want the conversation when update
+        return response(IssueConversations::find($issuesConversationID), 200);
     }
 
     /**
@@ -64,10 +80,26 @@ class IssueConversationsController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($issueID, $issueConversationID)
+    public function destroy(Issue $issue, $issueConversationsID)
     {
-        $conversation = Issue::find($issueID)->conversations()->find($issueConversationID)->delete();
 
-        return response()->json($conversation,200);
+        $issue->conversations()->find($issueConversationsID)->delete();
+
+        //delete response 204
+        return response()->json(null, 204);
     }
+
+    private function check($request, $issuesConversationID, $issue)
+    {
+        //checking if user id belongs to the conversation
+        if ($request->user()->id != IssueConversations::find($issuesConversationID)->user_id) {
+            throw new UserConversationCheck();
+        } //check if issue id matches the issue id in the conversation
+        else if ($issue->id != IssueConversations::find($issuesConversationID)->issue_id) {
+            return response("Conversation doesn't exist in this issue", 500);
+        }
+    }
+
+
+
 }

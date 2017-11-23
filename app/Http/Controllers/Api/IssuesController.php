@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\IssueRequest;
+use App\Http\Resources\IssueResource;
 use App\Http\Resources\IssuesResourceCollection;
 use App\Issue;
+use App\IssueConversations;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\User;
+use Illuminate\Http\Response;
 
 class IssuesController extends Controller
 {
@@ -15,9 +18,31 @@ class IssuesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+
+    /**
+     * @SWG\Get(path="/api/issues/",
+     *     tags={"Get Issues"},
+     *     operationId="index",
+     *     summary="Get all issues that user has access to",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(name="page", in="query", description="Page number", required=true,type="integer", format="int64"),
+     *     @SWG\Response(response=200,
+     *      description="Successful",
+     *      @SWG\Schema(
+     *      type="object",
+     *      @SWG\Property(property="data",type="array",title="data",
+     *             @SWG\Items(ref="#/definitions/App\Issue")
+     *      ),
+     *      @SWG\Property(property="links", ref="#/definitions/collectionLinks"),
+     *      @SWG\Property(property="meta", ref="#/definitions/collectionMeta")
+     *      )
+     * )
+     * )
+     *
+     */
+    public function index(Request $request)
     {
-        return new IssuesResourceCollection(Issue::paginate());
+        return new IssuesResourceCollection($request->user()->issues()->paginate(), Response::HTTP_OK);
     }
 
 
@@ -27,7 +52,7 @@ class IssuesController extends Controller
      * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(IssueRequest $request)
     {
         /*
          * $request->user() is used to get user data is because the User $user parameter cannot be passed
@@ -37,7 +62,7 @@ class IssuesController extends Controller
         $issue = $request->user()->issues()->create([
             'issue' => $request->issue
         ]);
-        return response()->json($issue);
+        return response()->json(new IssueResource($issue), Response::HTTP_CREATED);
     }
 
     /**
@@ -69,18 +94,11 @@ class IssuesController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(IssueRequest $request, Issue $issue)
     {
-        /*
-         * $request->user() is used to get user data is because the User $user parameter cannot be passed
-         * in the method
-         * */
+        $issue->update($request->all());
 
-        $request->user()->issues()->find($id)->update([
-            'issue' => $request->get('issue')
-        ]);
-
-        return response()->json('success', 200);
+        return response()->json(new IssueResource($issue), Response::HTTP_OK);
     }
 
     /**
@@ -89,9 +107,12 @@ class IssuesController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Issue $issue)
     {
-        Issue::destroy($id);
-        return response()->json($id . ' has been deleted', 200);
+        $issue->delete();
+
+        return response()->json(null, Response::HTTP_NO_CONTENT);
     }
+
+
 }

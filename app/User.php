@@ -34,6 +34,7 @@ class User extends Authenticatable
 {
     use Notifiable, HasApiTokens;
 
+    protected $table = 'users';
     /**
      * The attributes that are mass assignable.
      *
@@ -49,8 +50,13 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token', 'created_at', 'updated_at'
     ];
+
+//    protected $with = [
+//        'issues', 'roles'
+//    ];
+    public $timestamps = true;
 
     public function issues()
     {
@@ -59,6 +65,6 @@ class User extends Authenticatable
 
     public function roles()
     {
-        return $this->belongsToMany(Role::class, 'role_user','user_id','role_id');
+        return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
     }
 }

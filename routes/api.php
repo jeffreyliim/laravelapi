@@ -22,7 +22,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     #issues conversations - has many, belongs to
     Route::resource('issues.conversations', 'Api\IssueConversationsController', ['only' => ['index', 'store', 'destroy', 'update']]);
 
-    #user roles - belongs to many
+    #user roles - belongs to many, belongs to many
     Route::resource('users.roles', 'Api\UserRolesController', ['only' => ['index', 'destroy', 'store','update']]);
 
 });

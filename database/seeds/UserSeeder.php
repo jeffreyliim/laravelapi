@@ -16,5 +16,11 @@ class UserSeeder extends Seeder
             'email'=>'jlportfolio28858@gmail.com',
             'password'=>'$2y$10$Tl95nas3hL9e5X82qJ0WpuznIBjln70pBdOdiRm4hcEyiVKbTmbXC'
         ]);
+
+        \App\User::create([
+            'name'=>'michelle lim',
+            'email'=>'user@user.com',
+            'password'=>'$2y$10$Tl95nas3hL9e5X82qJ0WpuznIBjln70pBdOdiRm4hcEyiVKbTmbXC'
+        ]);
     }
 }
