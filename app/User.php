@@ -54,7 +54,7 @@ class User extends Authenticatable
     ];
 
 //    protected $with = [
-//        'issues', 'roles'
+//        'roles'
 //    ];
     public $timestamps = true;
 
@@ -66,5 +66,10 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
+    }
+
+    public function conversations()
+    {
+        return $this->hasMany(IssueConversations::class);
     }
 }

@@ -34,14 +34,14 @@ class Issue extends Model
     ];
 
 //    protected $with = [
-//        'user', 'conversations'
+//        'conversations', 'user'
 //    ];
 
     public $timestamps = true;
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function conversations()

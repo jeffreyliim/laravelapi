@@ -45,5 +45,10 @@ class IssueConversations extends Model
         return $this->belongsTo(Issue::class, 'issue_id');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
 
 }

@@ -114,5 +114,13 @@ class IssuesController extends Controller
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 
+    public function deleteIssue(Issue $issue)
+    {
+        $issue->delete();
+
+        return response()->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+
 
 }

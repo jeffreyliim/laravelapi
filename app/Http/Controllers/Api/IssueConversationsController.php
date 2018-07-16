@@ -13,6 +13,7 @@ use App\Issue;
 use App\IssueConversations;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Response;
 
 class IssueConversationsController extends Controller
 {
@@ -25,7 +26,7 @@ class IssueConversationsController extends Controller
     {
         //gets index collection of conversations including meta data
 
-        return new IssueConversationResourceCollection(IssueConversations::paginate());
+        return new IssueConversationResourceCollection(IssueConversations::paginate(), Response::HTTP_OK);
     }
 
 
@@ -99,7 +100,6 @@ class IssueConversationsController extends Controller
             return response("Conversation doesn't exist in this issue", 500);
         }
     }
-
 
 
 }

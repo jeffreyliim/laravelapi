@@ -29,10 +29,6 @@ class Role extends Model
         'created_at', 'updated_at'
     ];
 
-//    protected $with = [
-//        'users'
-//    ];
-
     public $timestamps = true;
 
     public function users()
